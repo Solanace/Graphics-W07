@@ -23,10 +23,13 @@
   and (x2, y2, z2) to the polygon matrix. They
   define a single triangle surface.
   ====================*/
-void add_polygon( struct matrix *polygons, 
-                  double x0, double y0, double z0, 
-                  double x1, double y1, double z1, 
-                  double x2, double y2, double z2 ) {
+void add_polygon(struct matrix *polygons, 
+                 double x0, double y0, double z0, 
+                 double x1, double y1, double z1, 
+                 double x2, double y2, double z2) {
+	add_point(polygons, x0, y0, z0);
+	add_point(polygons, x1, y1, z1);
+	add_point(polygons, x2, y2, z2);
 }
 
 /*======== void draw_polygons() ==========
@@ -38,7 +41,23 @@ void add_polygon( struct matrix *polygons,
   lines connecting each points to create bounding
   triangles
   ====================*/
-void draw_polygons( struct matrix *polygons, screen s, color c ) {
+void draw_polygons(struct matrix *polygons, screen s, color c) {
+	if (polygons->lastcol < 3) {
+		printf("Need at least 3 points to draw a triangle!\n");
+		return;
+	}
+	int i;
+	for (i = 0; i < polygons->lastcol - 1; i += 3) {
+		draw_line(polygons->m[0][i], polygons->m[1][i],
+		          polygons->m[0][i + 1], polygons->m[1][i + 1],
+		          s, c);
+		draw_line(polygons->m[0][i + 1], polygons->m[1][i + 1],
+		          polygons->m[0][i + 2], polygons->m[1][i + 2],
+		          s, c);
+		draw_line(polygons->m[0][i + 2], polygons->m[1][i + 2],
+		          polygons->m[0][i], polygons->m[1][i],
+		          s, c);
+	}
 }
 
 
@@ -59,33 +78,55 @@ void draw_polygons( struct matrix *polygons, screen s, color c ) {
 void add_box( struct matrix * edges,
               double x, double y, double z,
               double width, double height, double depth ) {
+	double x0, y0, z0, x1, y1, z1;
+	x0 = x;
+	x1 = x+width;
+	y0 = y;
+	y1 = y-height;
+	z0 = z;
+	z1 = z-depth;
 
-  double x0, y0, z0, x1, y1, z1;
-  x0 = x;
-  x1 = x+width;
-  y0 = y;
-  y1 = y-height;
-  z0 = z;
-  z1 = z-depth;
+	// Polygons
+	// Front
+	add_polygon(edges,
+	            x0, y0, z0,
+	            x0, y1, z0,
+	            x1, y1, z0);
+	add_polygon(edges,
+	            x1, y1, z0,
+	            x1, y0, z0,
+	            x0, y0, z0);
+	// Back
+	add_polygon(edges,
+	            x0, y0, z1,
+	            x0, y1, z1,
+	            x1, y1, z1);
+	add_polygon(edges,
+	            x1, y1, z1,
+	            x1, y0, z1,
+	            x0, y0, z1);
+	print_matrix(edges);
+	// Sides, in the order of North -> West -> South -> East
+	/*
+	// Edges
+	//front
+	add_edge(edges, x0, y0, z0, x1, y0, z0);
+	add_edge(edges, x1, y0, z0, x1, y1, z0);
+	add_edge(edges, x1, y1, z0, x0, y1, z0);
+	add_edge(edges, x0, y1, z0, x0, y0, z0);
 
-  
-  //front
-  add_edge(edges, x0, y0, z0, x1, y0, z0);
-  add_edge(edges, x1, y0, z0, x1, y1, z0);
-  add_edge(edges, x1, y1, z0, x0, y1, z0);
-  add_edge(edges, x0, y1, z0, x0, y0, z0);
+	//back
+	add_edge(edges, x0, y0, z1, x1, y0, z1);
+	add_edge(edges, x1, y0, z1, x1, y1, z1);
+	add_edge(edges, x1, y1, z1, x0, y1, z1);
+	add_edge(edges, x0, y1, z1, x0, y0, z1);
 
-  //back
-  add_edge(edges, x0, y0, z1, x1, y0, z1);
-  add_edge(edges, x1, y0, z1, x1, y1, z1);
-  add_edge(edges, x1, y1, z1, x0, y1, z1);
-  add_edge(edges, x0, y1, z1, x0, y0, z1);
-
-  //sides
-  add_edge(edges, x0, y0, z0, x0, y0, z1);
-  add_edge(edges, x1, y0, z0, x1, y0, z1);
-  add_edge(edges, x1, y1, z0, x1, y1, z1);
-  add_edge(edges, x0, y1, z0, x0, y1, z1);
+	//sides
+	add_edge(edges, x0, y0, z0, x0, y0, z1);
+	add_edge(edges, x1, y0, z0, x1, y0, z1);
+	add_edge(edges, x1, y1, z0, x1, y1, z1);
+	add_edge(edges, x0, y1, z0, x0, y1, z1);
+	*/
 }
 
 
