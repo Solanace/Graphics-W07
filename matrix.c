@@ -243,7 +243,8 @@ void print_matrix(struct matrix *m) {
 				printf(" ");
 				ele_count ++;
 			}
-			printf("%0.2f", m->m[r][c]);
+			if (m->m[r][c] < 0 && m->m[r][c] >= -0.01) printf("0.00");
+			else printf("%0.2f", m->m[r][c]);
 			if (c < m->lastcol - 1) {
 				printf("  ");
 			}
